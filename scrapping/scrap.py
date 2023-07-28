@@ -1,10 +1,9 @@
 from bs4 import BeautifulSoup
 from requests import get, ConnectionError
 from pandas import DataFrame
-from .NewsDatabase import NewsDatabase
 
 
-def scrap(url: str, classes: str, tablename: str, db_connection: NewsDatabase) -> None:
+def scrap(url: str, classes: str) -> DataFrame:
     """
     Função Scrapping base para os sites de notícias da UNIR, pois os mesmos possuem a mesma estrutura HTML, apenas
     mudando o nome das classes dos cards de notícias.
@@ -12,10 +11,8 @@ def scrap(url: str, classes: str, tablename: str, db_connection: NewsDatabase) -
     Args:
         url (str): URL da página de notícias.
         classes (str): Nome da classe dos cards de notícias.
-        tablename (str): Nome da tabela no banco de dados sqlite.
-        db_connection (NewsDatabase): Objeto de conexão com o banco de dados sqlite.
     Returns:
-        None
+        DataFrame
     """
 
     req = get(url)
@@ -38,8 +35,6 @@ def scrap(url: str, classes: str, tablename: str, db_connection: NewsDatabase) -
 
             info = info_container.find("a")
 
-            rows.append((info.string, date.string, info.get("href")))
+            rows.append((info.string, date.string, info.get("href"), "TRUE"))
 
-        db_connection.load_dataframe(
-            DataFrame(rows, columns=["title", "date", "link"]), tablename
-        )
+        return DataFrame(rows, columns=["title", "date", "link", "viewed"])
